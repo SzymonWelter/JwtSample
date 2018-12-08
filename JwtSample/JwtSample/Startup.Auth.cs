@@ -4,9 +4,11 @@ using System.Linq;
 using System.Security.Claims;
 using System.Security.Principal;
 using System.Threading.Tasks;
+using JwtSample.DataContext;
 using JwtSample.TokenProviders;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 
@@ -39,10 +41,13 @@ namespace JwtSample
 
         private Task<ClaimsIdentity> GetIdentity(string username, string password)
         {
-            
-
-            // Credentials are invalid, or account doesn't exist
-            return Task.FromResult<ClaimsIdentity>(null);
+            using(var db = new UsersContext())
+            {
+                var user = db.Users.Where(x => x.Username == username && x.Password == password).First();
+                if(user == null)
+                    return Task.FromResult<ClaimsIdentity>(null);
+                return Task.FromResult(new ClaimsIdentity(new GenericIdentity(username, "Token"), new Claim[] { }));
+            }            
         }
 
     }
