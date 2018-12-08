@@ -39,15 +39,12 @@ namespace JwtSample
                 });
         }
 
-        private Task<ClaimsIdentity> GetIdentity(string username, string password)
+        private Task<ClaimsIdentity> GetIdentity(string username, string password, UsersContext usersContext)
         {
-            using(var db = new UsersContext())
-            {
-                var user = db.Users.Where(x => x.Username == username && x.Password == password).First();
-                if(user == null)
-                    return Task.FromResult<ClaimsIdentity>(null);
-                return Task.FromResult(new ClaimsIdentity(new GenericIdentity(username, "Token"), new Claim[] { }));
-            }            
+            var userExist = usersContext.Users.SingleOrDefault(x => x.Username == username && x.Password == password);
+            if(userExist == null)
+                return Task.FromResult<ClaimsIdentity>(null);
+            return Task.FromResult(new ClaimsIdentity(new GenericIdentity(username, "Token"), new Claim[] { }));                        
         }
 
     }

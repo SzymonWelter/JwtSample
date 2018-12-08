@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using JwtSample.DataContext;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using System;
@@ -28,12 +29,12 @@ namespace JwtSample.TokenProviders
         }
 
         public Task Invoke(HttpContext context)
-        {
+        {           
             if(!context.Request.Path.Equals(_options.Path, StringComparison.Ordinal))
             {
                 return _next(context);
             }
-            if (context.Request.Method.Equals("POST") && context.Request.HasFormContentType)
+            if (context.Request.Method.Equals("GET") && context.Request.HasFormContentType)
                 return GenereteToken(context);
             context.Response.StatusCode = 400;
             return context.Response.WriteAsync("Bad request");
@@ -43,8 +44,8 @@ namespace JwtSample.TokenProviders
         {
             var username = context.Request.Form["Username"];
             var password = context.Request.Form["Password"];
-
-            var identity = await _options.IdentityResolver(username, password);
+            var db = (UsersContext)context.RequestServices.GetService(typeof(UsersContext));
+            var identity = await _options.IdentityResolver(username, password, db);
             if(identity == null)
             {
                 context.Response.StatusCode = 400;
