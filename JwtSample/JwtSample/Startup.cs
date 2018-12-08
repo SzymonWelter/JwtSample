@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Text;
+using JwtSample.DataContext;
 using JwtSample.TokenProviders;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
 namespace JwtSample
@@ -58,10 +61,11 @@ namespace JwtSample
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
-        {
-            // Add framework services.
-            services.AddMvc();
+        {            
             ConfigureAuth(services);
+            services.AddDbContext<UsersContext>(options => options.UseSqlServer(Configuration["DbContext:ConnectionString"]));
+            services.AddMvc();
+           
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -70,7 +74,7 @@ namespace JwtSample
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
 
-            app.UseTokenProvider(_tokenProviderOptions);
+            app.UseMiddleware<TokenProviderMiddleware>(Options.Create(_tokenProviderOptions));
             app.UseAuthentication();
             app.UseMvc();
         }
