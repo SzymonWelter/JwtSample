@@ -41,8 +41,8 @@ namespace JwtSample
 
         private Task<ClaimsIdentity> GetIdentity(string username, string password, UsersContext usersContext)
         {
-            var userExist = usersContext.Users.SingleOrDefault(x => x.Username == username && x.Password == password);
-            if(userExist == null)
+            var userExist = usersContext.Users.Any(x => x.Username == username && x.Password == password);
+            if(!userExist)
                 return Task.FromResult<ClaimsIdentity>(null);
             return Task.FromResult(new ClaimsIdentity(new GenericIdentity(username, "Token"), new Claim[] { }));                        
         }

@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.IdentityModel.Tokens;
 using AuthenticationProperties = Microsoft.AspNetCore.Authentication.AuthenticationProperties;
 
-namespace JwtSample
+namespace JwtSample.TokenProviders
 {
     public class CustomJwtDataFormat : ISecureDataFormat<AuthenticationTicket>
     {
@@ -14,8 +14,8 @@ namespace JwtSample
 
         public CustomJwtDataFormat(string algorithm, TokenValidationParameters validationParameters)
         {
-            this._algorithm = algorithm;
-            this._validationParameters = validationParameters;
+            _algorithm = algorithm;
+            _validationParameters = validationParameters;
         }
 
         public AuthenticationTicket Unprotect(string protectedText)
@@ -29,7 +29,7 @@ namespace JwtSample
             try
             {
                 SecurityToken validToken = null;
-                principal = handler.ValidateToken(protectedText, this._validationParameters, out validToken);
+                principal = handler.ValidateToken(protectedText, _validationParameters, out validToken);
 
                 var validJwt = validToken as JwtSecurityToken;
 
